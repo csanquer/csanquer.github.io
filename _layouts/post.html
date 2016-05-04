@@ -41,14 +41,14 @@ layout: default
             {% endif %}
           </span>
           {% endif %}
-          on <span itemprop="datePublished" content="2014-08-28">{{ page.date | date: "%d/%m/%Y" }}</span>
-          {% if page.categories != empty %} under {% for category in page.categories limit:1 %}{{ category }}{% endfor %}{% endif %}
+          le <span itemprop="datePublished" content="2014-08-28">{{ page.date | date: "%d/%m/%Y" }}</span>
+          {% if page.categories != empty %} : {% for category in page.categories limit:1 %}{{ category }}{% endfor %}{% endif %}
         </i></small>
       </div>
 
       <div class="read-time">
         <small>
-          lu il y a {{ minutes }} minutes
+          lu il y a {{ minutes }} {{ minutes | pluralize: 'minute', 'minutes' }}
         </small>
       </div>
 
@@ -104,18 +104,18 @@ layout: default
 
       {% if site.twitter_username and site.disqus_account %}
       <div class="content-panel feedback">
-        I <i class="fa fa-heart"></i> feedback.<br />
-        Let me know what you think of this article on twitter <a href="http://www.twitter.com/{{ site.twitter_username }}">@{{ site.twitter_username }}</a> or leave a comment below!
+        J'<i class="fa fa-heart"></i> les feedbacks.<br />
+        Partager vos impressions sur twitter <a href="http://www.twitter.com/{{ site.twitter_username }}">@{{ site.twitter_username }}</a> ou laissez un commentaire ci-dessous !
       </div>
       {% elsif site.twitter_username %}
       <div class="content-panel feedback">
-        I <i class="fa fa-heart"></i> feedback.<br />
-        Let me know what you think of this article on twitter <a href="http://www.twitter.com/{{ site.twitter_username }}">@{{ site.twitter_username }}</a>!
+        J'<i class="fa fa-heart"></i> les feedbacks.<br />
+        Partager vos impressions sur twitter <a href="http://www.twitter.com/{{ site.twitter_username }}">@{{ site.twitter_username }}</a>!
       </div>
       {% elsif site.disqus_account %}
       <div class="content-panel feedback">
-        I <i class="fa fa-heart"></i> feedback.<br />
-        Let me know what you think of this article in the comment section below!
+        J'<i class="fa fa-heart"></i> les feedbacks.<br />
+        Partager vos impressions en laissant un commentaire ci-dessous !
       </div>
       {% endif %}
 
@@ -123,9 +123,6 @@ layout: default
       <div class="content-panel comments">
         <div id="disqus_thread">
           <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-          {% comment %}
-          <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-          {% endcomment %}
         </div>
       </div>
       {% endif %}

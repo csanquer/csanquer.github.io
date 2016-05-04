@@ -38,4 +38,3 @@ permalink: pretty
 exclude:
   - vendor
   - curriculum-vitae.md
-  - projects.md
