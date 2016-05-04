@@ -194,7 +194,7 @@ puis créez un fichier vhost pour gitweb ( ex git.mydomain.example)
 
 créez le fichier `/etc/apache2/sites-available/gitweb-ssl` :
 
-```apache
+```
 <IfModule mod_ssl.c>
 <VirtualHost *:443>
   ServerName git.mydomain.example
