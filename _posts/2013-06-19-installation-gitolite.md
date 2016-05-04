@@ -178,3 +178,126 @@ on crée un nouveau fichier de mot de passe pour gitweb (via la commande apache 
 ```sh
 htpasswd -c /home/git/git_users.passwd VotrePrenom.VotreNom
 ```
+
+Configuration du serveur Web (apache ou nginx)
+----------------------------------------------
+
+D'abord, ajoutez l'utilisateur apache (ou nginx) `www-data` au groupe `git`:
+
+```sh
+sudo adduser www-data git
+```
+
+puis créez un fichier vhost pour gitweb ( ex git.mydomain.example)
+
+### Configuration Apache 2
+
+créez le fichier `/etc/apache2/sites-available/gitweb-ssl` :
+
+```apache
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+  ServerName git.mydomain.example
+  DocumentRoot "/usr/share/gitweb"
+  DirectoryIndex index.cgi
+
+  <Location />
+      # try anonymous access first, resort to real
+      #Satisfy Any
+      # authentication if necessary.
+      Require valid-user
+
+      SSLRequireSSL
+
+      # how to authenticate a user
+      AuthType Basic
+      AuthName "Gitweb : Depots git"
+      AuthUserFile /home/git/git_users.passwd
+   </Location>
+
+   <Directory /usr/share/gitweb>
+      Options FollowSymLinks +ExecCGI
+      AddHandler cgi-script .cgi
+   </Directory>
+
+   CustomLog /var/log/apache2/gitweb.access.log combined
+   ErrorLog /var/log/apache2/gitweb.error.log
+
+   SSLEngine on
+   SSLCertificateFile    /etc/ssl/certs/<my-ssl-certificate-pem>.pem
+   # Add this once there is a real (non self-signed) certificate.
+   SSLCertificateKeyFile /etc/ssl/private/<my-ssl-certificate-key>.key
+</VirtualHost>
+
+<VirtualHost *:80>
+  ServerName git.mydomain.example
+
+  Redirect / https://git.mydomain.example/
+</VirtualHost>
+</IfModule>
+```
+
+Enfin activez le vhost et redémarrez apache :
+
+```sh
+a2enmod rewrite actions headers ssl vhost_alias
+a2ensite gitweb-ssl
+service apache2 restart
+```
+
+### Configuration Nginx
+
+créez le fichier `/etc/nginx/sites-available/gitweb-ssl` :
+
+```nginx
+server {
+    listen 80 ;
+
+    server_name git.mydomain.example;
+    rewrite ^ https://git.mydomain.example$request_uri permanent;
+}
+
+# HTTPS server
+#
+server {
+    listen 443;
+    server_name git.mydomain.example;
+
+    root /usr/share/gitweb;
+
+    ssl on;
+    ssl_certificate /etc/ssl/localcerts/<my-ssl-certificate-pem>.pem;
+    ssl_certificate_key /etc/ssl/localcerts/<my-ssl-certificate-key>.key;
+
+    ssl_session_timeout 5m;
+
+    ssl_protocols SSLv3 TLSv1;
+    ssl_ciphers ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv3:+EXP;
+    ssl_prefer_server_ciphers on;
+
+    access_log /var/log/nginx/gitweb.access.log;
+    error_log /var/log/nginx/gitweb.error.log;
+    charset utf-8;
+
+    auth_basic           "RESTRICTED ACCESS";
+    auth_basic_user_file /home/git/git_users.passwd;
+
+    try_files $uri @gitweb;
+    location @gitweb {
+        fastcgi_pass unix:/var/run/fcgiwrap.socket;
+        fastcgi_param SCRIPT_FILENAME   /usr/share/gitweb/gitweb.cgi;
+        fastcgi_param PATH_INFO         $uri;
+        fastcgi_param GITWEB_CONFIG     /etc/gitweb.conf;
+        fastcgi_param REMOTE_USER     $remote_user;
+        include fastcgi_params;
+   }
+}
+```
+
+Enfin activez le vhost et redémarrez nginx :
+
+```sh
+ngxensite gitweb-ssl
+# ou ln -s /etc/nginx/sites-available/gitweb-ssl /etc/nginx/sites-enabled/gitweb-ssl
+service nginx restart
+```
