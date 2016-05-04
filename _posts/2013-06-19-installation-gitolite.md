@@ -194,48 +194,7 @@ puis créez un fichier vhost pour gitweb ( ex git.mydomain.example)
 
 créez le fichier `/etc/apache2/sites-available/gitweb-ssl` :
 
-```
-<IfModule mod_ssl.c>
-<VirtualHost *:443>
-  ServerName git.mydomain.example
-  DocumentRoot "/usr/share/gitweb"
-  DirectoryIndex index.cgi
 
-  <Location />
-      # try anonymous access first, resort to real
-      #Satisfy Any
-      # authentication if necessary.
-      Require valid-user
-
-      SSLRequireSSL
-
-      # how to authenticate a user
-      AuthType Basic
-      AuthName "Gitweb : Depots git"
-      AuthUserFile /home/git/git_users.passwd
-   </Location>
-
-   <Directory /usr/share/gitweb>
-      Options FollowSymLinks +ExecCGI
-      AddHandler cgi-script .cgi
-   </Directory>
-
-   CustomLog /var/log/apache2/gitweb.access.log combined
-   ErrorLog /var/log/apache2/gitweb.error.log
-
-   SSLEngine on
-   SSLCertificateFile    /etc/ssl/certs/<my-ssl-certificate-pem>.pem
-   # Add this once there is a real (non self-signed) certificate.
-   SSLCertificateKeyFile /etc/ssl/private/<my-ssl-certificate-key>.key
-</VirtualHost>
-
-<VirtualHost *:80>
-  ServerName git.mydomain.example
-
-  Redirect / https://git.mydomain.example/
-</VirtualHost>
-</IfModule>
-```
 
 Enfin activez le vhost et redémarrez apache :
 
