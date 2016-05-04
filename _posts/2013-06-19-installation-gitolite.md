@@ -15,13 +15,13 @@ Préparation
 -----------
 Au préalable, vous devez installer git et gitweb :
 
-```sh
+```shell
 sudo aptitude install git gitweb
 ```
 
 et créer un compte unix git qui va heberger gitolite et les dépots git :
 
-```sh
+```shell
 sudo adduser --system --shell /bin/bash --gecos 'git version control' --group --disabled-password --home /home/git git
 ```
 
@@ -32,7 +32,7 @@ Installation de gitolite
 
 On supprime les eventuelles clés SSH déjà autorisées et on prepare le PATH de l'utilisateur git
 
-```sh
+```shell
 sudo su git
 rm $HOME/.ssh/authorized_keys
 mkdir -p $HOME/bin
@@ -42,7 +42,7 @@ source .bashrc
 
 puis on installe gitolite depuis [github](https://github.com/sitaramc/gitolite "github gitolite") :
 
-```sh
+```shell
 git clone git://github.com/sitaramc/gitolite
 cd gitolite
 git co v3.5.3.1
@@ -169,13 +169,13 @@ Il suffit de modifier le fichier `/home/git/.gitolite.rc` en ajoutant ou modifia
 
 On change les droits des dépots (`drwxr-x---` pour les dossiers et `-rw-r-----` pour les fichiers ) afin qu'ils soient lisibles et modifiable par l'utilisateur git et lisibles uniquement par le groupe git.
 
-```sh
+```shell
 chmod -R u=rwX,g=rX,o= /home/git/repositories/*
 ```
 
 on crée un nouveau fichier de mot de passe pour gitweb (via la commande apache `htpasswd`)
 
-```sh
+```shell
 htpasswd -c /home/git/git_users.passwd VotrePrenom.VotreNom
 ```
 
@@ -184,7 +184,7 @@ Configuration du serveur Web (apache ou nginx)
 
 D'abord, ajoutez l'utilisateur apache (ou nginx) `www-data` au groupe `git`:
 
-```sh
+```shell
 sudo adduser www-data git
 ```
 
@@ -194,11 +194,52 @@ puis créez un fichier vhost pour gitweb ( ex git.mydomain.example)
 
 créez le fichier `/etc/apache2/sites-available/gitweb-ssl` :
 
+```apache
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+  ServerName git.mydomain.example
+  DocumentRoot "/usr/share/gitweb"
+  DirectoryIndex index.cgi
 
+  <Location />
+      # try anonymous access first, resort to real
+      #Satisfy Any
+      # authentication if necessary.
+      Require valid-user
+
+      SSLRequireSSL
+
+      # how to authenticate a user
+      AuthType Basic
+      AuthName "Gitweb : Depots git"
+      AuthUserFile /home/git/git_users.passwd
+   </Location>
+
+   <Directory /usr/share/gitweb>
+      Options FollowSymLinks +ExecCGI
+      AddHandler cgi-script .cgi
+   </Directory>
+
+   CustomLog /var/log/apache2/gitweb.access.log combined
+   ErrorLog /var/log/apache2/gitweb.error.log
+
+   SSLEngine on
+   SSLCertificateFile    /etc/ssl/certs/<my-ssl-certificate-pem>.pem
+   # Add this once there is a real (non self-signed) certificate.
+   SSLCertificateKeyFile /etc/ssl/private/<my-ssl-certificate-key>.key
+</VirtualHost>
+
+<VirtualHost *:80>
+  ServerName git.mydomain.example
+
+  Redirect / https://git.mydomain.example/
+</VirtualHost>
+</IfModule>
+```
 
 Enfin activez le vhost et redémarrez apache :
 
-```sh
+```shell
 a2enmod rewrite actions headers ssl vhost_alias
 a2ensite gitweb-ssl
 service apache2 restart
@@ -255,7 +296,7 @@ server {
 
 Enfin activez le vhost et redémarrez nginx :
 
-```sh
+```shell
 ngxensite gitweb-ssl
 # ou ln -s /etc/nginx/sites-available/gitweb-ssl /etc/nginx/sites-enabled/gitweb-ssl
 service nginx restart
