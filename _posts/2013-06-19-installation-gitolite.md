@@ -178,18 +178,3 @@ on crée un nouveau fichier de mot de passe pour gitweb (via la commande apache 
 ```sh
 htpasswd -c /home/git/git_users.passwd VotrePrenom.VotreNom
 ```
-
-Configuration du serveur Web (apache ou nginx)
-----------------------------------------------
-
-D'abord, ajoutez l'utilisateur apache (ou nginx) `www-data` au groupe `git`:
-
-```sh
-sudo adduser www-data git
-```
-
-puis créez un fichier vhost pour gitweb ( ex git.mydomain.example)
-
-### Configuration Apache 2
-
-créez le fichier `/etc/apache2/sites-available/gitweb-ssl` :
