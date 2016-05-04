@@ -168,3 +168,28 @@ Il suffit de modifier le fichier `/home/git/.gitolite.rc` en ajoutant ou modifia
 ```
 
 On change les droits des dépots (`drwxr-x---` pour les dossiers et `-rw-r-----` pour les fichiers ) afin qu'ils soient lisibles et modifiable par l'utilisateur git et lisibles uniquement par le groupe git.
+
+```sh
+chmod -R u=rwX,g=rX,o= /home/git/repositories/*
+```
+
+on crée un nouveau fichier de mot de passe pour gitweb (via la commande apache `htpasswd`)
+
+```sh
+htpasswd -c /home/git/git_users.passwd VotrePrenom.VotreNom
+```
+
+Configuration du serveur Web (apache ou nginx)
+----------------------------------------------
+
+D'abord, ajoutez l'utilisateur apache (ou nginx) `www-data` au groupe `git`:
+
+```sh
+sudo adduser www-data git
+```
+
+puis créez un fichier vhost pour gitweb ( ex git.mydomain.example)
+
+### Configuration Apache 2
+
+créez le fichier `/etc/apache2/sites-available/gitweb-ssl` :
