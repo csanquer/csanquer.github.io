@@ -1,14 +1,25 @@
 ---
 layout: default
 ---
-<div class="post">
+<div class="container-fluid single">
+  <div class="row">
 
-  <header class="post-header">
-    <h1>{{ page.title }}</h1>
-  </header>
+    <div class="col-md-12 article">
+      {% if site.data.thumbnail[page.thumbnail] %}
+      <div class="thumb">
+        <img src="{{ site.data.thumbnail[page.thumbnail] }}" alt="Thumbnail: {{ page.thumbnail }}" />
+      </div>
+      {% elsif page.thumbnail %}
+      <div class="thumb">
+        <i class="fa fa-{{ page.thumbnail }} fa-4x"></i>
+      </div>
+      {% endif %}
 
-  <article class="post-content">
-  {{ content }}
-  </article>
+      <h1 class="header">{{ page.title }}</h1>
 
+      <div class="content-panel content">
+        <span>{{ content }}</span>
+      </div>
+    </div>
+  </div>
 </div>
